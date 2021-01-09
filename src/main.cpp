@@ -12,6 +12,9 @@
 
 #define COMMAND_READ_VOLTAGE 0x01
 
+#define DEBUG_COMMAND_LED_ON 0xD1
+#define DEBUG_COMMAND_LED_OFF 0xD0
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
@@ -29,6 +32,9 @@ struct TXBuffer {
 volatile uint8_t command = 0;
 volatile uint8_t commandParam[COMMAND_PARAM_BUFFER_SIZE];
 volatile uint8_t commandParamWPos = 0; // Write position for command parameter
+
+void debugLedON();
+void debugLedOFF();
 
 void handleCommands();
 void handleReadVoltageCommand();
@@ -48,6 +54,7 @@ void setupUSART0() {
     UBRR0L = HC05_UBRR;
 
     // Set TXD0 as output
+    // TODO: Find out if we can remove this
     DDRE |= (1<<DDE1);
 
     // Enable receiver, transmitter and interrupts
@@ -67,7 +74,7 @@ void setup() {
 
     setupUSART0();
 
-    DDRB |= (1 << DDB6);  // LED on / off port
+    DDRB |= (1 << DDB6);  // LED on / off for debugging
 
     sei();
 }
@@ -118,9 +125,21 @@ void handleCommands() {
             handleReadVoltageCommand();
         break;
 
+        case DEBUG_COMMAND_LED_ON:
+            debugLedON();
+        break;
+
+        case DEBUG_COMMAND_LED_OFF:
+            debugLedOFF();
+        break;
+
         default:
             handleUnknownCommand();
     }
+
+    // Reset command
+    command = 0;
+    commandParamWPos = 0;
 }
 
 /**
@@ -137,11 +156,13 @@ void handleReadVoltageCommand() {
     append2TxBuffer(':');
     append2TxBuffer('\n');
     tx0Buffer.isReady = true; // Ready to print out
-
-    // Reset command
-    command = 0;
-    commandParamWPos = 0;
 }
+
+/**
+ * LED ON / OFF for Debugging
+ */
+void debugLedON() {PORTB |= (1 << PB6);}
+void debugLedOFF() {PORTB &= ~(1 << PB6);}
 
 /**
  * 
@@ -160,10 +181,6 @@ void handleUnknownCommand() {
     append2TxBuffer(']');
     append2TxBuffer('\n');
     tx0Buffer.isReady = true; // Ready to print out
-
-    // Reset command
-    command = 0;
-    commandParamWPos = 0;
 }
 
 void append2TxBuffer(uint8_t data) {
