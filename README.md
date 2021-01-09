@@ -1,1 +1,1 @@
-# ATMega128A_voltage_logger_master
+# ATMega128A voltage logger master
