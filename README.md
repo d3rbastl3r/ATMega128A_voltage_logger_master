@@ -45,8 +45,8 @@ Overview of used Pins
 - PD7 ?
 
 ## Port E
-- PE0 - RXD0    | Communication to the Bluetooth Module 
-- PE1 - TXD0    | Communication to the Bluetooth Module
+- PE0 - RXD0    | (USART0) Communication to the Bluetooth Module 
+- PE1 - TXD0    | (USART0) Communication to the Bluetooth Module
 - PE2 ?
 - PE3 ?
 - PE4 ?
